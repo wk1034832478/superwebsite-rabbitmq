@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -37,6 +38,9 @@ public class MessageProcessor implements Processor {
             case MessageType.OneToOne:
                 fromOneToOne( message );
                 break;
+            case MessageType.BROADCAST_ALL:
+                broadcast( message );
+                break;
         }
     }
 
@@ -52,6 +56,19 @@ public class MessageProcessor implements Processor {
             sendMessage( session, "session-id=" + session.getId() );
         } catch (Exception e ) {
             this.logger.error( e.getMessage() );
+        }
+    }
+
+    public void broadcast( Message message ) {
+        String msg = JsonUtil.fromObjectToString( message );
+        Iterator<Session> iterator = this.currentSessions.values().iterator();
+        while ( iterator.hasNext() ) {
+            Session session = iterator.next();
+            try {
+                this.sendMessageByMessageText( session, msg );
+            } catch (IOException e) {
+                this.logger.error( "发送错误，{}", e.getMessage() );
+            }
         }
     }
 
@@ -105,6 +122,11 @@ public class MessageProcessor implements Processor {
      */
     public void sendMessage( Session session, Message message ) throws IOException {
         session.getBasicRemote().sendText( JsonUtil.fromObjectToString( message) );
+    }
+
+
+    public void sendMessageByMessageText( Session session, String text ) throws IOException {
+        session.getBasicRemote().sendText( text );
     }
 
     public void sendMessage( Session session, String msg ) throws IOException {

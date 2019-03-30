@@ -41,6 +41,14 @@ public class Message {
 
     public Message() {}
 
+    public static Message getBroadcastMessage(String msg) {
+        Message message = new Message();
+        message.setMsg( msg );
+        message.setType( MessageType.BROADCAST_ALL );
+        message.setCode( MessageCode.CODE_SUCCESS );
+        return message;
+    }
+
     public void setCode(int code) {
         this.code = code;
     }
