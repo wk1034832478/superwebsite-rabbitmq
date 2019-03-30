@@ -17,6 +17,12 @@ public class Result<T> {
         this.data = data;
     }
 
+    public Result(int code, String msg, T data) {
+        this.code = code;
+        this.msg = msg;
+        this.data =data;
+    }
+
     public Result(int code, String msg) {
         this.code = code;
         this.msg = msg;
@@ -62,6 +68,10 @@ public class Result<T> {
 
     public static Result get200(String message)  {
         return new Result(ResultEnum.CODE_SUCCESS, message);
+    }
+
+    public static Result get200(String message, Object data)  {
+        return new Result<>(ResultEnum.CODE_SUCCESS, message, data );
     }
 
     public static Result get201(String message)  {

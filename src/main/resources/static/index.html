@@ -3,51 +3,217 @@
 <head>
     <meta charset="utf-8">
     <title>菜鸟教程(runoob.com)</title>
-
+    <style>
+        .session-list { float: left; width: 30%; height: 20vw; border: 1px solid black; }
+        .me { text-align: right;}
+        .others { text-align: left; }
+    </style>
     <script type="text/javascript">
-        function WebSocketTest()
+
+
+        var ws;
+        var users;
+        var mysessionid;
+        var to; // 发送人
+        var session;
+        var send;
+        var message = {
+            'from': '',
+            'to': '',
+            'type': 1,
+            'msg': ''
+        };
+
+        function open( url ) {
+            // 检查浏览器是否支持
+            if ("WebSocket" in window) {
+                return new WebSocket( url );
+            }
+            return null;
+        }
+
+        var xmlhttp;
+        function loadXml(url, callback)
         {
-            if ("WebSocket" in window)
+            xmlhttp=null;
+            if (window.XMLHttpRequest)
+            {// code for all new browsers
+                xmlhttp=new XMLHttpRequest();
+            }
+            else if (window.ActiveXObject)
+            {// code for IE5 and IE6
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            if (xmlhttp!=null)
             {
-                alert("您的浏览器支持 WebSocket!");
-
-                // 打开一个 web socket
-                var ws = new WebSocket("ws://localhost:8087/test");
-
-                ws.onopen = function()
-                {
-                    // Web Socket 已连接上，使用 send() 方法发送数据
-
-                    ws.onclose = function()
-                    {
-                        // 关闭 websocket
-                        alert("连接已关闭...");
-                    };
-                }
-
+                xmlhttp.onreadystatechange=callback;
+                xmlhttp.open("GET",url,true);
+                xmlhttp.send(null);
+            }
             else
-                {
-                    // 浏览器不支持 WebSocket
-                    alert("您的浏览器不支持 WebSocket!");
+            {
+                alert("Your browser does not support XMLHTTP.");
+            }
+        }
+
+        function refreshDom()
+        {
+            if (xmlhttp.readyState==4)
+            {// 4 = "loaded"
+                if (xmlhttp.status==200)
+                {// 200 = OK
+                    var res = JSON.parse( xmlhttp.responseText );
+                    console.log( res.data );
+                    (function( data , users) {
+                        for ( var i = 0; i < data.length; i++ ) {
+                            var a = document.createElement( "a" );
+                            a.setAttribute("href","javascript: chatWith(" + data[i] + ")");
+                            a.innerText = '用户' + res.data[i];
+                            users.appendChild( a );
+                        }
+                    })(res.data, users)
                 }
-            }     ws.send("发送数据");
-                    alert("数据发送中...");
-                };
-
-                ws.onmessage = function (evt)
+                else
                 {
-                    var received_msg = evt.data;
-                    console.log( received_msg )
-                    // alert("数据已接收...");
-                };
+                    alert("Problem retrieving XML data");
+                }
+            }
+        }
 
+        function refreshUsers() {
+            loadXml('/api/session/list', refreshDom)
+        }
+
+        function chatWith( sid ) {
+            message.to = sid;
+        }
+
+        function addMessage(isMe ,message) {
+            p = document.createElement("p");
+            if (isMe ) {
+                p.setAttribute("class", 'me');
+
+                var span1 = document.createElement("span")
+                span1.innerText = message.msg;
+                p.appendChild( span1 );
+
+                p.innerText += ":";
+
+                var span2 = document.createElement("span")
+                span2.innerText = "我";
+                p.appendChild( span2 );
+
+            } else {
+                p.setAttribute("class", 'others');
+
+                var span1 = document.createElement("span")
+                span1.innerText = message.from;
+                p.appendChild( span1 );
+
+                p.innerText += ":";
+
+                var span2 = document.createElement("span")
+                span2.innerText = message.msg;
+                p.appendChild( span2 );
+            }
+
+            session.appendChild( p )
+        }
+
+        function sendMessage() {
+            message.from;
+            message.msg = send.value;
+            ws.send( JSON.stringify( message ) );
+        }
+
+        window.onload= function(e) {
+            session = document.getElementById( "session" );
+            users = document.getElementById( "users");
+            send = document.getElementById("send");
+            ws = open( "ws://localhost:8087/api/chatting" )
+            refreshUsers();
+
+            ws.onmessage = function( ev ){
+                var message = JSON.parse( ev.data );
+                addMessage( false , message )
+            }
+        }
+
+
+        // var ws;
+        // var send;
+        // var receive;
+        // function WebSocketTest()
+        // {
+        //     receive = document.getElementById( "receive" );
+        //     send = document.getElementById( "send" );
+        //     if ("WebSocket" in window)
+        //     {
+        //         // alert("您的浏览器支持 WebSocket!");
+        //
+        //         // 打开一个 web socket
+        //         ws = new WebSocket("ws://localhost:8087/api/chatting");
+        //
+        //         ws.onopen = function()
+        //         {
+        //             // Web Socket 已连接上，使用 send() 方法发送数据
+        //             ws.send("发送数据");
+        //             alert("数据发送中...");
+        //         };
+        //
+        //         ws.onmessage = function (evt)
+        //         {
+        //             var received_msg = evt.data;
+        //             console.log( received_msg )
+        //             // alert("数据已接收...");
+        //             receive.innerText = received_msg;
+        //         };
+        //
+        //         ws.onclose = function()
+        //         {
+        //             // 关闭 websocket
+        //             alert("连接已关闭...");
+        //         };
+        //     }
+        //
+        //     else
+        //     {
+        //         // 浏览器不支持 WebSocket
+        //         alert("您的浏览器不支持 WebSocket!");
+        //     }
+        // }
+        //
+        // function sendMsg() {
+        //     ws.send( send.value )
+        // }
     </script>
 
 </head>
 <body>
+    <!-- 当前在线用户 -->
+    <div class="session-list">
+        <h6>当前在线用户</h6>
+        <div id="users" class="users">
+        </div>
+    </div>
+    <div class="session" id="session">
+        <p align="center">
+            消息列表
+        </p>
+        <!--<p class="me">-->
+            <!--<span>消息</span>:-->
+            <!--<span class="name">小五</span>-->
+        <!--</p>-->
+        <!--<p class='others'>-->
+            <!--<span class="name">小六</span>:-->
+            <!--<span>消息</span>-->
+        <!--</p>-->
+    </div>
 
 <div id="sse">
-    <a href="javascript:WebSocketTest()">运行 WebSocket</a>
+    <input type="text" id="send" />
+    <p id="receive"></p>
+    <a href="javascript:sendMessage()">发送消息</a>
 </div>
 
 </body>
