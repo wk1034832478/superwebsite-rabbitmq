@@ -24,6 +24,9 @@
             'msg': ''
         };
 
+        Notification.requestPermission();
+
+
         function open( url ) {
             // 检查浏览器是否支持
             if ("WebSocket" in window) {
@@ -90,6 +93,22 @@
 
         function addMessage(isMe ,message) {
             p = document.createElement("p");
+
+            // 检查用户是否同意接受通知
+             if (Notification.permission === "granted") {
+                // If it's okay let's create a notification
+                var notification = new Notification( message.msg );
+            }
+
+            // 否则我们需要向用户获取权限
+            else if (Notification.permission !== 'denied') {
+                Notification.requestPermission(function (permission) {
+                    // 如果用户同意，就可以向他们发送通知
+                    if (permission === "granted") {
+                        var notification = new Notification( message.msg  );
+                    }
+                });
+            }
             if (isMe ) {
                 p.setAttribute("class", 'me');
 
