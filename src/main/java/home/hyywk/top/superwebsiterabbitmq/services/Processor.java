@@ -3,7 +3,6 @@ package home.hyywk.top.superwebsiterabbitmq.services;
 import home.hyywk.top.superwebsiterabbitmq.entity.Message;
 
 import javax.websocket.Session;
-import java.util.List;
 import java.util.Set;
 
 /**

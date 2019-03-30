@@ -70,7 +70,7 @@
                     (function( data , users) {
                         for ( var i = 0; i < data.length; i++ ) {
                             var a = document.createElement( "a" );
-                            a.setAttribute("href","javascript: chatWith(" + data[i] + ")");
+                            a.setAttribute("href","javascript: chatWith('" + data[i] + "')");
                             a.innerText = '用户' + res.data[i];
                             users.appendChild( a );
                         }
