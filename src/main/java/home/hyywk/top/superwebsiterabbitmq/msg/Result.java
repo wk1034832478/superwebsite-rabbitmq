@@ -28,6 +28,11 @@ public class Result<T> {
         this.msg = msg;
     }
 
+    public Result(int code, T t) {
+        this.code = code;
+        this.data = t;
+    }
+
     public int getCode() {
         return code;
     }
@@ -78,12 +83,24 @@ public class Result<T> {
         return new Result(ResultEnum.CODE_CREATE, message);
     }
 
+    public static <T> Result get201(T t)  {
+        return new Result(ResultEnum.CODE_CREATE, t);
+    }
+
     public static Result get204(String message)  {
         return new Result(ResultEnum.CODE_DELETE, message);
     }
 
     public static Result get400(String message)  {
         return new Result(ResultEnum.CODE_INVALID, message);
+    }
+
+    public static Result get403(String message)  {
+        return new Result(ResultEnum.CODE_FORBIDDEN, message);
+    }
+
+    public static Result get404(String message)  {
+        return new Result(ResultEnum.CODE_NOT_FOUND, message);
     }
 
     public static Result get500(String message)  {

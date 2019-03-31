@@ -5,16 +5,24 @@ package home.hyywk.top.superwebsiterabbitmq.entity;
  */
 public class Message {
     /**
-     * 信息来源
+     * 信息来源者的会话id
      */
     private String from;
+
+    /**
+     * 发送者id
+     */
+    private int fromId;
+
+    /**
+     * 发送者姓名
+     */
+    private String fromName;
 
     /**
      * 信息目的地 tos
      */
     private String to;
-    private String tos; // 是当发给多个人的时候使用的
-
     /**
      * 信息内容
      */
@@ -25,15 +33,52 @@ public class Message {
      */
     private int type;
 
+    private int groupId;
+
     /**
      * 发送相映码
      */
     private int code;
 
-    public Message(String from, String to, String tos, String msg, int type, int code) {
+    public Message(String msg, int type, int groupId) {
+        this.msg = msg;
+        this.type = type;
+        this.groupId = groupId;
+    }
+
+    public Message(String from, String to, String msg, int type, int code) {
         this.from = from;
         this.to = to;
-        this.tos = tos;
+        this.msg = msg;
+        this.type = type;
+        this.code = code;
+    }
+
+    public Message(String from, String fromName, String to,  String msg, int type, int code) {
+        this.from = from;
+        this.fromName = fromName;
+        this.to = to;
+        this.msg = msg;
+        this.type = type;
+        this.code = code;
+    }
+
+    public Message(int fromId, String from, String fromName, String to, String msg, int type, int code) {
+        this.fromId = fromId;
+        this.from = from;
+        this.fromName = fromName;
+        this.to = to;
+        this.msg = msg;
+        this.type = type;
+        this.code = code;
+    }
+
+    public Message(int groupId, int fromId, String from, String fromName, String to, String msg, int type, int code) {
+        this.groupId = groupId;
+        this.fromId = fromId;
+        this.from = from;
+        this.fromName = fromName;
+        this.to = to;
         this.msg = msg;
         this.type = type;
         this.code = code;
@@ -49,20 +94,37 @@ public class Message {
         return message;
     }
 
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
+
+    public int getFromId() {
+        return fromId;
+    }
+
+    public void setFromId(int fromId) {
+        this.fromId = fromId;
+    }
+
+    public void setFromName(String fromName) {
+        this.fromName = fromName;
+    }
+
+    public String getFromName() {
+        return fromName;
+    }
+
     public void setCode(int code) {
         this.code = code;
     }
 
     public int getCode() {
         return code;
-    }
-
-    public void setTos(String tos) {
-        this.tos = tos;
-    }
-
-    public String getTos() {
-        return tos;
     }
 
     public String getFrom() {
@@ -95,5 +157,10 @@ public class Message {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "groupId:" + this.groupId +", msg:" + msg;
     }
 }

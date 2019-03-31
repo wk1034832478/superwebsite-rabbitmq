@@ -1,11 +1,12 @@
 package home.hyywk.top.superwebsiterabbitmq.config;
 
 import com.rabbitmq.client.ConnectionFactory;
-import org.I0Itec.zkclient.ZkClient;
+import home.hyywk.top.superwebsiterabbitmq.processors.OneToManyProcessor;
+import home.hyywk.top.superwebsiterabbitmq.processors.OneToOneProcessor;
+import home.hyywk.top.superwebsiterabbitmq.processors.ProcessStack;
+import home.hyywk.top.superwebsiterabbitmq.processors.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.scope.ScopedObject;
-import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.web.cors.CorsConfiguration;
@@ -53,6 +54,20 @@ public class SpringInitialierConfig {
     }
 
     /**
+     * 公共消息处理处理器
+     * @return
+     */
+    @Scope("singleton")
+    @Bean
+    public Processor initProcessor() {
+        ProcessStack processStack = new ProcessStack( true );
+        processStack.addProcessor( new OneToOneProcessor() );
+        processStack.addProcessor( new OneToManyProcessor() );
+        return processStack;
+    }
+
+
+    /**
      * 初始化连接工厂对象，还没有对其连接进行缓存,此对象应当为单丽模式
      * @return
      */
@@ -68,15 +83,15 @@ public class SpringInitialierConfig {
         return factory;
     }
 
-    @Scope("singleton")
-    @Bean
-    public ZkClient zkClient() {
-        ZkClient zkClient = new ZkClient(this.zkServers, 3000 );
-        if ( !zkClient.exists(this.root ) ) {
-            this.logger.info("正在创建超人网站通讯固定根节点");
-            zkClient.createPersistent(this.root, "超人网站通讯固定根节点");
-        }
-        return zkClient;
-    }
+//    @Scope("singleton")
+//    @Bean
+//    public ZkClient zkClient() {
+//        ZkClient zkClient = new ZkClient(this.zkServers, 3000 );
+//        if ( !zkClient.exists(this.root ) ) {
+//            this.logger.info("正在创建超人网站通讯固定根节点");
+//            zkClient.createPersistent(this.root, "超人网站通讯固定根节点");
+//        }
+//        return zkClient;
+//    }
 
 }

@@ -59,6 +59,13 @@
             }
         }
 
+        function clearAllNode(parentNode){
+            while (parentNode.firstChild) {
+                var oldNode = parentNode.removeChild(parentNode.firstChild);
+                oldNode = null;
+            }
+        }
+
         function refreshDom()
         {
             if (xmlhttp.readyState==4)
@@ -67,6 +74,7 @@
                 {// 200 = OK
                     var res = JSON.parse( xmlhttp.responseText );
                     console.log( res.data );
+                    clearAllNode( users );
                     (function( data , users) {
                         for ( var i = 0; i < data.length; i++ ) {
                             var a = document.createElement( "a" );
@@ -82,6 +90,7 @@
                 }
             }
         }
+
 
         function refreshUsers() {
             loadXml('/api/session/list', refreshDom)
@@ -140,22 +149,56 @@
         }
 
         function sendMessage() {
-            message.from;
+            message.from = mysessionid ;
             message.msg = send.value;
             ws.send( JSON.stringify( message ) );
+        }
+
+        function connect() {
+            ws = open( "ws://localhost:8087/api/chatting" )
+            ws.onopen = function( ev ) {
+                console.log( '建立连接中。。。。' );
+            }
+            ws.onmessage = function( ev ){
+                var message = JSON.parse( ev.data );
+                addMessage( false , message )
+            }
+        }
+
+        /**
+         * 获取套接字会话id
+         */
+        function getSocketSessionId() {
+            loadXml( "/api/sessionid", setSocketSessionId)
+        }
+
+        function setSocketSessionId(  ) {
+
+            if (xmlhttp.readyState==4)
+            {// 4 = "loaded"
+                if (xmlhttp.status==200)
+                {// 200 = OK
+                    var message = JSON.parse( xmlhttp.responseText );
+                    if ( message.code == 200 ) {
+                        mysessionid = message.msg;
+                        console.log( message.msg );
+                    } else {
+                        alert(  message.msg );
+                    }
+                }
+                else
+                {
+                    alert("Problem retrieving XML data");
+                }
+            }
+
         }
 
         window.onload= function(e) {
             session = document.getElementById( "session" );
             users = document.getElementById( "users");
             send = document.getElementById("send");
-            ws = open( "ws://localhost:8087/api/chatting" )
-            refreshUsers();
 
-            ws.onmessage = function( ev ){
-                var message = JSON.parse( ev.data );
-                addMessage( false , message )
-            }
         }
 
 
@@ -232,6 +275,9 @@
 <div id="sse">
     <input type="text" id="send" />
     <p id="receive"></p>
+    <a href="javascript:connect()">连接</a>
+    <a href="javascript:getSocketSessionId();">获取sessionId</a>
+    <a href="javascript:refreshUsers()">刷新当前用户</a>
     <a href="javascript:sendMessage()">发送消息</a>
 </div>
 
